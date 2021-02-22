@@ -68,6 +68,66 @@ t1 = time.time()
 #        pass
 #data = data.reset_index(drop = True)
 #data.to_pickle(dataOutputDir + 'MERRA-2_OMAERUV_MODIS_AERONET_collocation/MERRA-2_OMAERUV_MODIS_AERONET_collocation_2014-2019.pickle')
+# # =============================================================================
+# # pre-processing
+# # =============================================================================
+# temp['doy'] = temp['dateTimeLocal'].dt.dayofyear + (temp['dateTimeLocal'].dt.hour + temp['dateTimeLocal'].dt.minute / 60 + temp['dateTimeLocal'].dt.second / 3600) / 24
+# # MERRA-2 SSA
+# temp['SSA'] = 1 - temp['AAOD'] / temp['AOD']
+# # OMAERUV at 550 nm
+# EAE = Angstorm(388, temp['AOD388'], 500, temp['AOD500'])
+# temp['AOD550'] = wvldepAOD(500, temp['AOD500'], 550, EAE)
+# temp['AOD440'] = wvldepAOD(500, temp['AOD500'], 440, EAE)
+
+# AAE = Angstorm(388, temp['AAOD388'], 500, temp['AAOD500'])
+# temp['AAOD550'] = wvldepAOD(500, temp['AAOD500'], 550, AAE)
+# temp['AAOD440'] = wvldepAOD(500, temp['AAOD500'], 440, AAE)
+
+# temp['SSA440'] = 1 - temp['AAOD440'] / temp['AOD440']  
+# temp['SSA550'] = 1 - temp['AAOD550'] / temp['AOD550']  
+
+# # AERONET AOD
+# temp['AOD440(AERONET)'] = temp['Absorption_AOD[440nm]'] / (1 - temp['Single_Scattering_Albedo[440nm]'])
+# temp['AOD500(AERONET)'] = temp['Absorption_AOD[500nm]'] / (1 - temp['Single_Scattering_Albedo[500nm]'])
+# temp['AOD550(AERONET)'] = temp['Absorption_AOD[550nm]'] / (1 - temp['Single_Scattering_Albedo[550nm]'])
+# # AERONET AAOD uncertainties
+# AAOD_err = list(map(errorPropagation, np.c_[temp['Single_Scattering_Albedo[550nm]'], temp['AOD550(AERONET)']]))
+# temp['AAOD_err'] = np.array(AAOD_err)[:, -1]         
+# # remove NaN and negative values
+# mask = (temp['Absorption_AOD[550nm]'] >= 0) & (temp['AI388std'] <= 0.5)
+# temp = temp[mask]
+# # =============================================================================
+# # quality control of AOD and SSA
+# # =============================================================================
+# # OMAERUV SSA and AOD
+# temp['diffSSA500'] = np.abs(temp['Single_Scattering_Albedo[500nm]'] - temp['SSA500']) <= 0.03
+# temp['diffSSA440'] = np.abs(temp['Single_Scattering_Albedo[440nm]'] - temp['SSA440']) <= 0.03
+# temp['diffSSA550'] = np.abs(temp['Single_Scattering_Albedo[550nm]'] - temp['SSA550']) <= 0.03
+# dAOD = np.abs(temp['AOD500(AERONET)'] - temp['AOD500'])
+# temp['diffAOD500'] = False
+# temp['diffAOD500'][(dAOD <= 0.1) | (dAOD > 0.1) & (dAOD / temp['AOD500(AERONET)'] <= 0.3)] = True
+
+# dAOD = np.abs(temp['AOD440(AERONET)'] - temp['AOD440'])
+# temp['diffAOD440'] = False
+# temp['diffAOD440'][(dAOD <= 0.1) | (dAOD > 0.1) & (dAOD / temp['AOD440(AERONET)'] <= 0.3)] = True
+
+# dAOD = np.abs(temp['AOD550(AERONET)'] - temp['AOD550'])
+# temp['diffAOD550'] = False
+# temp['diffAOD550'][(dAOD <= 0.1) | (dAOD > 0.1) & (dAOD / temp['AOD550(AERONET)'] <= 0.3)] = True
+
+# # MODIS AOD
+# temp['diffAOD'] = np.nan
+# land = temp['landoceanMask'] >= 0.5
+# temp.loc[temp['landoceanMask'] >= 0.5, 'diffAOD'] = np.abs(temp['AOD550(AERONET)'][land] - temp['AOD550(MODIS)'][land]) <= (0.05 + 0.15 * temp['AOD550(AERONET)'][land])
+# temp.loc[temp['landoceanMask'] < 0.5, 'diffAOD'] = np.abs(temp['AOD550(AERONET)'][~land] - temp['AOD550(MODIS)'][~land]) <= (0.03 + 0.05 * temp['AOD550(AERONET)'][~land])
+
+# temp = temp[(temp['AOD550(MODIS)'] >= 0.0)]
+# temp = temp[temp.diffSSA500 & temp.diffAOD500 & temp.diffAOD & (temp['AOD550(MODIS)'] >= temp['Absorption_AOD[550nm]'])] 
+
+
+
+
+
 #%%
 # =============================================================================
 # Prepare training data
@@ -86,37 +146,52 @@ class dataTrain():
         # OMAERUV at 550 nm
         EAE = Angstorm(388, temp['AOD388'], 500, temp['AOD500'])
         temp['AOD550'] = wvldepAOD(500, temp['AOD500'], 550, EAE)
+        temp['AOD440'] = wvldepAOD(500, temp['AOD500'], 440, EAE)
         
         AAE = Angstorm(388, temp['AAOD388'], 500, temp['AAOD500'])
         temp['AAOD550'] = wvldepAOD(500, temp['AAOD500'], 550, AAE)
+        temp['AAOD440'] = wvldepAOD(500, temp['AAOD500'], 440, AAE)
         
+        temp['SSA440'] = 1 - temp['AAOD440'] / temp['AOD440']  
         temp['SSA550'] = 1 - temp['AAOD550'] / temp['AOD550']  
     
         # AERONET AOD
+        temp['AOD440(AERONET)'] = temp['Absorption_AOD[440nm]'] / (1 - temp['Single_Scattering_Albedo[440nm]'])
         temp['AOD500(AERONET)'] = temp['Absorption_AOD[500nm]'] / (1 - temp['Single_Scattering_Albedo[500nm]'])
         temp['AOD550(AERONET)'] = temp['Absorption_AOD[550nm]'] / (1 - temp['Single_Scattering_Albedo[550nm]'])
         # AERONET AAOD uncertainties
         AAOD_err = list(map(errorPropagation, np.c_[temp['Single_Scattering_Albedo[550nm]'], temp['AOD550(AERONET)']]))
         temp['AAOD_err'] = np.array(AAOD_err)[:, -1]         
         # remove NaN and negative values
-        mask = (temp['Absorption_AOD[550nm]'] > 0) & (temp['AI388std'] <= 0.5)
+        mask = (temp['Absorption_AOD[550nm]'] >= 0) & (temp['AI388std'] <= 0.5)
         temp = temp[mask]
 # =============================================================================
 # quality control of AOD and SSA
 # =============================================================================
         # OMAERUV SSA and AOD
-        temp['diffSSA'] = np.abs(temp['Single_Scattering_Albedo[500nm]'] - temp['SSA500']) <= 0.03
+        temp['diffSSA500'] = np.abs(temp['Single_Scattering_Albedo[500nm]'] - temp['SSA500']) <= 0.03
+        temp['diffSSA440'] = np.abs(temp['Single_Scattering_Albedo[440nm]'] - temp['SSA440']) <= 0.03
+        temp['diffSSA550'] = np.abs(temp['Single_Scattering_Albedo[550nm]'] - temp['SSA550']) <= 0.03
         dAOD = np.abs(temp['AOD500(AERONET)'] - temp['AOD500'])
         temp['diffAOD500'] = False
-        temp['diffAOD500'][dAOD <= 0.1] = True
-        temp['diffAOD500'][(dAOD > 0.1) & (dAOD / temp['AOD500'] <= 0.3)] = True
+        temp['diffAOD500'][(dAOD <= 0.1) | (dAOD > 0.1) & (dAOD / temp['AOD500(AERONET)'] <= 0.3)] = True
+        
+        dAOD = np.abs(temp['AOD440(AERONET)'] - temp['AOD440'])
+        temp['diffAOD440'] = False
+        temp['diffAOD440'][(dAOD <= 0.1) | (dAOD > 0.1) & (dAOD / temp['AOD440(AERONET)'] <= 0.3)] = True
+        
+        dAOD = np.abs(temp['AOD550(AERONET)'] - temp['AOD550'])
+        temp['diffAOD550'] = False
+        temp['diffAOD550'][(dAOD <= 0.1) | (dAOD > 0.1) & (dAOD / temp['AOD550(AERONET)'] <= 0.3)] = True
+
         # MODIS AOD
         temp['diffAOD'] = np.nan
         land = temp['landoceanMask'] >= 0.5
         temp.loc[temp['landoceanMask'] >= 0.5, 'diffAOD'] = np.abs(temp['AOD550(AERONET)'][land] - temp['AOD550(MODIS)'][land]) <= (0.05 + 0.15 * temp['AOD550(AERONET)'][land])
         temp.loc[temp['landoceanMask'] < 0.5, 'diffAOD'] = np.abs(temp['AOD550(AERONET)'][~land] - temp['AOD550(MODIS)'][~land]) <= (0.03 + 0.05 * temp['AOD550(AERONET)'][~land])
         
-        temp = temp[temp.diffSSA & temp.diffAOD & (temp['AOD550(MODIS)'] >= 0.0)]
+        temp = temp[(temp['AOD550(MODIS)'] >= 0.0)]
+        
 # =============================================================================
 # aerosol types based on AAE, EAE and SSA
 # =============================================================================
@@ -141,17 +216,24 @@ class dataTrain():
 # =============================================================================
 # shuffle and split   
 # =============================================================================
-        data = temp[temp.diffSSA & temp.diffAOD500 & temp.diffAOD & (temp['AOD550(MODIS)'] >= temp['Absorption_AOD[550nm]'])].copy()      
+        data = temp[temp.diffSSA500 & temp.diffAOD500 & temp.diffAOD & (temp['AOD550(MODIS)'] >= temp['Absorption_AOD[550nm]'])].copy()      
         data = shuffle(data, random_state = 1)
+
+        AAOD_mask = detectOutliers(data['Absorption_AOD[550nm]'], method = '3std')
+        AOD_mask = detectOutliers(data['AOD550(MODIS)'], method = '3std')
+        AI_mask = detectOutliers(data['AI388'], method = '3std')
+        ALH_mask = detectOutliers(data['Haer_t1'], method = '3std')
+
+        # data = data[AAOD_mask]
         self.data = data
         
-        fig = plt.figure(figsize = (3, 3))
-        ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
-        cmap2 = sns.color_palette("twilight_shifted", 5)
-        data.groupby('type').count()['As'].plot(kind = 'pie', colors = cmap2, autopct='%i%%',)
-        plt.ylabel('')
-        plt.title('Aerosol components in training data')
-        plt.savefig(figdir + 'Aerosol_components_training_data.png', dpi = 300, transparent = True)
+        # fig = plt.figure(figsize = (3, 3))
+        # ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
+        # cmap2 = sns.color_palette("twilight_shifted", 5)
+        # data.groupby('type').count()['As'].plot(kind = 'pie', colors = cmap2, autopct='%i%%',)
+        # plt.ylabel('')
+        # plt.title('Aerosol components in training data')
+        # plt.savefig(figdir + 'Aerosol_components_training_data.png', dpi = 300, transparent = True)
         
         # testing with a fraction of data to save time
         f = 1
@@ -162,14 +244,18 @@ class dataTrain():
         # self.parameters = self.features + ['AAOD500', 'AAOD', 'Absorption_AOD[550nm]', 'residue']
         X = data[self.features].values[::f, :]
 #        X[:, -1] *= (1 + np.random.uniform(low=-0.5, high=0.5, size=(len(X),)))
-        Y = data['Absorption_AOD[550nm]'].values[::f]
+        Y = data['Absorption_AOD[550nm]']
         self.X = X
         self.Y = Y
      
         # training and validation split
         n = 0.90
         self.X_train, self.X_vld, self.Y_train, self.Y_vld = train_test_split(X, Y, train_size = n, test_size = 0.9999 - n, random_state = 33)
+        self.train_idx = self.Y_train.index
+        self.vld_idx = self.Y_vld.index
         
+        self.Y_train = self.Y_train.values
+        self.Y_vld = self.Y_vld.values
         # self.X_train = self.data_train[features].values
         # self.X_vld = self.data_vld[features].values
         
