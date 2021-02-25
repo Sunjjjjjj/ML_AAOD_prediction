@@ -141,6 +141,8 @@ class dataTrain():
 # pre-processing
 # =============================================================================
         temp['doy'] = temp['dateTimeLocal'].dt.dayofyear + (temp['dateTimeLocal'].dt.hour + temp['dateTimeLocal'].dt.minute / 60 + temp['dateTimeLocal'].dt.second / 3600) / 24
+        temp['distance'] = geoDistance(temp['Latitude(Degrees)'], temp['Longitude(Degrees)'], temp['lat'], temp['lon'])
+
         # MERRA-2 SSA
         temp['SSA'] = 1 - temp['AAOD'] / temp['AOD']
         # OMAERUV at 550 nm
