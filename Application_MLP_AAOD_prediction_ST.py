@@ -81,40 +81,40 @@ num_features = data.X_train.shape[1]
 model = tf.keras.models.load_model(scriptDir + "best_model/best_model_%s" % (expName))
 
 #%%
-cmap = matplotlib.cm.twilight_shifted_r
-cmap1 = shiftedColorMap(cmap, start=0.5, midpoint=0.6, stop=1, name='shifted')
-cmap = matplotlib.cm.cubehelix_r
-cmap2 = shiftedColorMap(cmap, start=0, midpoint = 0.5, stop=1, name='shifted')
+# cmap = matplotlib.cm.twilight_shifted_r
+# cmap1 = shiftedColorMap(cmap, start=0.5, midpoint=0.6, stop=1, name='shifted')
+# cmap = matplotlib.cm.cubehelix_r
+# cmap2 = shiftedColorMap(cmap, start=0, midpoint = 0.5, stop=1, name='shifted')
 
 
-# prediction
-Y_pred = model(data.X_norm).numpy().reshape(-1)
-slope, intercept, r_value, p_value, std_err = stats.linregress(data.Y_vld, Y_pred)
+# # prediction
+# Y_pred = model(data.X_norm).numpy().reshape(-1)
+# slope, intercept, r_value, p_value, std_err = stats.linregress(data.Y_vld, Y_pred)
 
 
-fig = plt.figure(figsize = (4, 4))
-ax = fig.add_axes([0.15, 0.15, 0.7, 0.7])
-plt.hist2d(data.Y_vld, Y_pred, bins = 75, cmap = cmap1, 
-           norm = matplotlib.colors.LogNorm(), vmin = 1, vmax = 1e2)
-perc = (abs(Y_pred - data.Y_vld) <= data.data.AAOD_err.loc[data.vld_idx]).sum() / len(Y_pred) * 100
-plt.text(5e-3, 1e-1, r'k: %1.2f  b: %1.2f''\n''$R^2$: %1.2f''\n''RMSE: %1.3f''\n''MAE: %1.3f''\n''P: %02i%%' \
-         % (slope, intercept, np.corrcoef(Y_pred, data.Y_vld)[0, 1], 
-            RMSE(Y_pred, data.Y_vld), 
-            MAE(Y_pred, data.Y_vld), 
-            perc))
-plt.xlim(0, 0.15)
-plt.ylim(0, 0.15)
-plt.xticks(0, 0.15)
-plt.yticks(0, 0.15)
-ax.xaxis.get_major_formatter().set_powerlimits((0,1))
-ax.yaxis.get_major_formatter().set_powerlimits((0,1))
-plt.plot(np.arange(0, 10), np.arange(0, 10) * slope + intercept, 'k-', linewidth = 1)
-plt.plot([0, 1], [0, 1], '--', color = 'gray', linewidth = 1)
-plt.plot([0, 0.5], [0, 1], '--', color = 'gray', linewidth = 1)
-plt.plot([0, 1], [0, 0.5], '--', color = 'gray', linewidth = 1)
-cax = fig.add_axes([0.875, 0.15, 0.05, 0.7])
-cb = plt.colorbar(cax = cax, fraction=0.1, pad=0.05, shrink = 0.9, aspect = 10, \
-                  label = '# num', extend = 'both', )
+# fig = plt.figure(figsize = (4, 4))
+# ax = fig.add_axes([0.15, 0.15, 0.7, 0.7])
+# plt.hist2d(data.Y_vld, Y_pred, bins = 75, cmap = cmap1, 
+#            norm = matplotlib.colors.LogNorm(), vmin = 1, vmax = 1e2)
+# perc = (abs(Y_pred - data.Y_vld) <= data.data.AAOD_err.loc[data.vld_idx]).sum() / len(Y_pred) * 100
+# plt.text(5e-3, 1e-1, r'k: %1.2f  b: %1.2f''\n''$R^2$: %1.2f''\n''RMSE: %1.3f''\n''MAE: %1.3f''\n''P: %02i%%' \
+#          % (slope, intercept, np.corrcoef(Y_pred, data.Y_vld)[0, 1], 
+#             RMSE(Y_pred, data.Y_vld), 
+#             MAE(Y_pred, data.Y_vld), 
+#             perc))
+# plt.xlim(0, 0.15)
+# plt.ylim(0, 0.15)
+# plt.xticks(0, 0.15)
+# plt.yticks(0, 0.15)
+# ax.xaxis.get_major_formatter().set_powerlimits((0,1))
+# ax.yaxis.get_major_formatter().set_powerlimits((0,1))
+# plt.plot(np.arange(0, 10), np.arange(0, 10) * slope + intercept, 'k-', linewidth = 1)
+# plt.plot([0, 1], [0, 1], '--', color = 'gray', linewidth = 1)
+# plt.plot([0, 0.5], [0, 1], '--', color = 'gray', linewidth = 1)
+# plt.plot([0, 1], [0, 0.5], '--', color = 'gray', linewidth = 1)
+# cax = fig.add_axes([0.875, 0.15, 0.05, 0.7])
+# cb = plt.colorbar(cax = cax, fraction=0.1, pad=0.05, shrink = 0.9, aspect = 10, \
+#                   label = '# num', extend = 'both', )
 # cb.ax.set_yticklabels([5, 10, 50, 100, 500]) 
 # plt.savefig(figdir + 'Model_performance.png', dpi = 300, transparent = True)
  
@@ -196,10 +196,10 @@ plt.savefig(figdir + 'Global_distribution_training_data.png', dpi = 300, transpa
 t3 = time.time()
 caseROI = {
             '1': {'S': -75, 'N': 75, 'W': -180, 'E': 180},
-           }
+            }
 
 caseDate = {
-            '1': pd.date_range('2019-01-01', '2019-12-31'),
+            '1': pd.date_range('2019-12-31', '2019-12-31'),
             }    
  
 parameters = ['Haer_e', 'Haer_a', 'Haer_63', 'Haer_p', 'Haer_t1', 'AOD']
@@ -208,7 +208,7 @@ parameters = ['Haer_e', 'Haer_a', 'Haer_63', 'Haer_p', 'Haer_t1', 'AOD']
 # validation data (collocated with AERONET)
 dataVal = pd.DataFrame()
 for icase in caseROI.keys():
-    for idate in caseDate[icase][::1]:
+    for idate in caseDate[icase][:]:
         sys.stdout.write('\r Applying to %s %04i-%02i-%02i' % (icase, idate.year, idate.month, idate.day))
 
         dataTest = pd.read_pickle(dataOutputDir + 'MERRA-2_OMAERUV_MODIS_collocation/MERRA-2_OMAERUV_MODIS_collocation_%04i-%02i-%02i.pickle' 
@@ -216,9 +216,10 @@ for icase in caseROI.keys():
         
         if len(dataTest) > 0:
             dataTest['doy'] = dataTest['dateTime'].dt.dayofyear + (dataTest['dateTime'].dt.hour + dataTest['dateTime'].dt.minute / 60 + dataTest['dateTime'].dt.second / 3600) / 24
+            # dataTest['sin_lon'] = np.sin(np.deg2rad(dataTest['lon']))
+            # dataTest['sin_doy'] = np.sin(2 * np.pi * dataTest['doy'] / 365)
             dataTest['sin_lon'] = np.sin(np.deg2rad(dataTest['lon']))
             dataTest['sin_doy'] = np.sin(2 * np.pi * dataTest['doy'] / 365)
-
 # =============================================================================
 # prediction
 # =============================================================================
@@ -261,6 +262,11 @@ print('Time used for parameter tuning: %1.2f s' % (t4 - t3))
 
 
 #%%
+import pickle
+pickle.HIGHEST_PROTOCOL = 4
+
+
+
 dataVal = pd.read_pickle(dataOutputDir + '%s_output/%s_output_validation.pickle' % (expName, expName))
 
 dataVal['AOD500(AERONET)'] = dataVal['Absorption_AOD[500nm]'] / (1 - dataVal['Single_Scattering_Albedo[500nm]'])

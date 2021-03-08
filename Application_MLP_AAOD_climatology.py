@@ -45,6 +45,8 @@ dataInputDir = '/Users/kanonyui/PhD_program/Data/'
 figdir = '/Users/kanonyui/Dropbox/Paper_Figure/ML_AAOD/'
 
 expName = "%s_%i-layer_%i-neuron" % ('DNN_AAOD_train_F11', 5, 2**8)
+# expName = "%s_%i-layer_%i-neuron" % ('DNN_AAOD_train_ST', 4, 2**6)
+
 try:
     os.mkdir(dataOutputDir + "%s_output/" % expName)
 except:
@@ -86,120 +88,121 @@ plt.close('all')
 #             'AOD500', 'AAOD500', 'SSA500',\
 #             'AOD550', 'AAOD550', 'SSA550']
 
-# # =============================================================================
-# # case application
-# # =============================================================================
+# =============================================================================
+# case application
+# =============================================================================
 # t3 = time.time()
 
-ROI = {'S': -75, 'N': 75, 'W': -180, 'E': 180}
-dates = pd.date_range('2006-01-01', '2019-12-31')
-seasons = (dates.month % 12 + 3) // 3
+# ROI = {'S': -75, 'N': 75, 'W': -180, 'E': 180}
+# dates = pd.date_range('2006-01-01', '2019-12-31')
+# seasons = (dates.month % 12 + 3) // 3
 
-years = np.arange(2019, 2020)
-months = np.arange(8, 9)
-# validation data (collocated with AERONET)
+# years = np.arange(2019, 2020)
+# months = np.arange(1, 13)
+# # validation data (collocated with AERONET)
 
-for yy in years:
-    for mm in months: 
-        mask = (dates.year == yy) & (dates.month == mm)
-        dataTest = pd.DataFrame()
-        for idate in dates[mask]:
-            try: 
-                sys.stdout.write('\r Reading %04i-%02i-%02i' % (idate.year, idate.month, idate.day))
-                temp = pd.read_pickle(dataOutputDir + '%s_output/%s_output_%04i-%02i-%02i.pickle'  
-                                      % (expName, expName, idate.year, idate.month, idate.day))
+# for yy in years:
+#     for mm in months: 
+#         mask = (dates.year == yy) & (dates.month == mm)
+#         dataTest = pd.DataFrame()
+#         for idate in dates[mask]:
+#             try: 
+#                 sys.stdout.write('\r Reading %04i-%02i-%02i' % (idate.year, idate.month, idate.day))
+#                 temp = pd.read_pickle(dataOutputDir + '%s_output/%s_output_%04i-%02i-%02i.pickle'  
+#                                       % (expName, expName, idate.year, idate.month, idate.day))
                 
-                # DNN and MERRA-2 SSA
-                temp.loc[temp['AOD550(MODIS)'] < temp['Y_pred'], 'Y_pred'] = np.nan
-                temp.loc[temp['AOD550(MODIS)'] < 0.1, 'Y_pred'] = np.nan
-                temp.loc[temp['AI388'] < 0, 'Y_pred'] = np.nan
-                temp['SSA_pred'] = 1 - temp['Y_pred'] / temp['AOD550(MODIS)']
-                temp['SSA'] = 1 - temp['AAOD'] / temp['AOD']
+#                 # DNN and MERRA-2 SSA
+#                 # temp.loc[temp['AOD550(MODIS)'] < temp['Y_pred'], 'Y_pred'] = np.nan
+#                 # temp.loc[temp['AOD550(MODIS)'] < 0.1, 'Y_pred'] = np.nan
+#                 # temp.loc[temp['AI388'] < 0, 'Y_pred'] = np.nan
+#                 temp.loc[temp['AOD550(MODIS)'] < 0.1, 'Y_pred'] = np.nan
+#                 temp['SSA_pred'] = 1 - temp['Y_pred'] / temp['AOD550(MODIS)']
+#                 temp['SSA'] = 1 - temp['AAOD'] / temp['AOD']
                 
-                temp.loc[temp['AOD500'] < 0, 'AOD500'] = np.nan
-                temp.loc[temp['AAOD500'] < 0, 'AAOD500'] = np.nan
-                temp.loc[temp['SSA500'] < 0, 'SSA500'] = np.nan
-                temp.loc[(temp['SSA_pred'] < 0) | (temp['SSA_pred'] > 1) | (np.isinf(temp['SSA_pred'])) , 'SSA_pred'] = np.nan
+#                 temp.loc[temp['AOD500'] < 0, 'AOD500'] = np.nan
+#                 temp.loc[temp['AAOD500'] < 0, 'AAOD500'] = np.nan
+#                 temp.loc[temp['SSA500'] < 0, 'SSA500'] = np.nan
+#                 temp.loc[(temp['SSA_pred'] < 0) | (temp['SSA_pred'] > 1) | (np.isinf(temp['SSA_pred'])) , 'SSA_pred'] = np.nan
         
-                # OMAERUV 550 nm
-                EAE = Angstorm(388, temp['AOD388'], 500, temp['AOD500'])
-                temp['AOD550'] = wvldepAOD(500, temp['AOD500'], 550, EAE)
-                AAE = Angstorm(388, temp['AAOD388'], 500, temp['AAOD500'])
-                temp['AAOD550'] = wvldepAOD(500, temp['AAOD500'], 550, AAE) 
-                temp['SSA550'] = 1 - temp['AAOD550'] / temp['AOD550']
+#                 # OMAERUV 550 nm
+#                 EAE = Angstorm(388, temp['AOD388'], 500, temp['AOD500'])
+#                 temp['AOD550'] = wvldepAOD(500, temp['AOD500'], 550, EAE)
+#                 AAE = Angstorm(388, temp['AAOD388'], 500, temp['AAOD500'])
+#                 temp['AAOD550'] = wvldepAOD(500, temp['AAOD500'], 550, AAE) 
+#                 temp['SSA550'] = 1 - temp['AAOD550'] / temp['AOD550']
                 
-                temp.loc[temp['AOD550'] < 0, 'AOD550'] = np.nan
-                temp.loc[temp['AAOD550'] < 0, 'AAOD550'] = np.nan
-                temp.loc[temp['SSA550'] < 0, 'SSA550'] = np.nan
+#                 temp.loc[temp['AOD550'] < 0, 'AOD550'] = np.nan
+#                 temp.loc[temp['AAOD550'] < 0, 'AAOD550'] = np.nan
+#                 temp.loc[temp['SSA550'] < 0, 'SSA550'] = np.nan
                 
                 
                
-                # temp = temp.groupby(['lat_g', 'lon_g']).mean()
-                # temp.reset_index(inplace = True) 
-            except:
-                temp = pd.DataFrame()
-                print('No prediction for %4i-%02i-%02i' % (idate.year, idate.month, idate.day))
+#                 # temp = temp.groupby(['lat_g', 'lon_g']).mean()
+#                 # temp.reset_index(inplace = True) 
+#             except:
+#                 temp = pd.DataFrame()
+#                 print('No prediction for %4i-%02i-%02i' % (idate.year, idate.month, idate.day))
             
 
-            dataTest = dataTest.append(temp)
-        dataTest = dataTest.groupby(['lat_g', 'lon_g']).mean()
-        dataTest.reset_index(inplace = True) 
+#             dataTest = dataTest.append(temp)
+#         dataTest = dataTest.groupby(['lat_g', 'lon_g']).mean()
+#         dataTest.reset_index(inplace = True) 
             
-        dataTest.to_pickle(dataOutputDir + '%s_output/%s_output_%4i-%02i.pickle' % (expName, expName, yy, mm))
+#         dataTest.to_pickle(dataOutputDir + '%s_output/%s_output_AOD-0.10_%4i-%02i.pickle' % (expName, expName, yy, mm))
        
 # t4 = time.time()
 # print('Time used for parameter tuning: %1.2f s' % (t4 - t3))
 
 #%%
-temp = dataTest
-temp.loc[temp['AOD550(MODIS)'] < temp['Y_pred'], 'SSA_pred'] = np.nan
-temp.loc[temp['AOD550(MODIS)'] < 0.1, 'SSA_pred'] = np.nan
-temp = temp[temp['AOD550(MODIS)'] > 0.1]
-temp = temp[temp['AI388'] > -100]
-temp = temp.groupby(['lon_g', 'lat_g']).mean()
-temp.reset_index(inplace = True)
+# temp = dataTest
+# temp.loc[temp['AOD550(MODIS)'] < temp['Y_pred'], 'SSA_pred'] = np.nan
+# temp.loc[temp['AOD550(MODIS)'] < 0.1, 'SSA_pred'] = np.nan
+# temp = temp[temp['AOD550(MODIS)'] > 0.1]
+# temp = temp[temp['AI388'] > -100]
+# temp = temp.groupby(['lon_g', 'lat_g']).mean()
+# temp.reset_index(inplace = True)
 
-fig = plt.figure(figsize = (8, 4))
-bm = Basemap(llcrnrlon=ROI['W'], llcrnrlat=ROI['S'], urcrnrlon=ROI['E'], urcrnrlat=ROI['N'], \
-            lat_0 = 0, lon_0 = 0, projection='cyl',resolution='c')
-bm.drawcoastlines(color='gray',linewidth=1)
-plt.scatter(temp.lon_g, temp.lat_g, c = temp.Y_pred, cmap = cmap1, s = 4)
-plt.colorbar()
+# fig = plt.figure(figsize = (8, 4))
+# bm = Basemap(llcrnrlon=ROI['W'], llcrnrlat=ROI['S'], urcrnrlon=ROI['E'], urcrnrlat=ROI['N'], \
+#             lat_0 = 0, lon_0 = 0, projection='cyl',resolution='c')
+# bm.drawcoastlines(color='gray',linewidth=1)
+# plt.scatter(temp.lon_g, temp.lat_g, c = temp.Y_pred, cmap = cmap1, s = 4)
+# plt.colorbar()
 
-fig = plt.figure(figsize = (8, 4))
-bm = Basemap(llcrnrlon=ROI['W'], llcrnrlat=ROI['S'], urcrnrlon=ROI['E'], urcrnrlat=ROI['N'], \
-            lat_0 = 0, lon_0 = 0, projection='cyl',resolution='c')
-bm.drawcoastlines(color='gray',linewidth=1)
-plt.scatter(temp.lon_g, temp.lat_g, c = temp.AI388, cmap = cmap1, s = 2, vmin = 0, vmax = 2)
-plt.colorbar()
+# fig = plt.figure(figsize = (8, 4))
+# bm = Basemap(llcrnrlon=ROI['W'], llcrnrlat=ROI['S'], urcrnrlon=ROI['E'], urcrnrlat=ROI['N'], \
+#             lat_0 = 0, lon_0 = 0, projection='cyl',resolution='c')
+# bm.drawcoastlines(color='gray',linewidth=1)
+# plt.scatter(temp.lon_g, temp.lat_g, c = temp.AI388, cmap = cmap1, s = 2, vmin = 0, vmax = 2)
+# plt.colorbar()
 
-fig = plt.figure(figsize = (8, 4))
-bm = Basemap(llcrnrlon=ROI['W'], llcrnrlat=ROI['S'], urcrnrlon=ROI['E'], urcrnrlat=ROI['N'], \
-            lat_0 = 0, lon_0 = 0, projection='cyl',resolution='c')
-bm.drawcoastlines(color='gray',linewidth=1)
-plt.scatter(temp.lon_g, temp.lat_g, c = temp.residue, cmap = cmap1, s = 2, vmin = 0, vmax = 2)
-plt.colorbar()
+# fig = plt.figure(figsize = (8, 4))
+# bm = Basemap(llcrnrlon=ROI['W'], llcrnrlat=ROI['S'], urcrnrlon=ROI['E'], urcrnrlat=ROI['N'], \
+#             lat_0 = 0, lon_0 = 0, projection='cyl',resolution='c')
+# bm.drawcoastlines(color='gray',linewidth=1)
+# plt.scatter(temp.lon_g, temp.lat_g, c = temp.residue, cmap = cmap1, s = 2, vmin = 0, vmax = 2)
+# plt.colorbar()
 
-fig = plt.figure(figsize = (8, 4))
-bm = Basemap(llcrnrlon=ROI['W'], llcrnrlat=ROI['S'], urcrnrlon=ROI['E'], urcrnrlat=ROI['N'], \
-            lat_0 = 0, lon_0 = 0, projection='cyl',resolution='c')
-bm.drawcoastlines(color='gray',linewidth=1)
-plt.scatter(temp.lon_g, temp.lat_g, c = temp['AOD550(MODIS)'], cmap = cmap1, s = 2, vmax = 1)
-plt.colorbar()
+# fig = plt.figure(figsize = (8, 4))
+# bm = Basemap(llcrnrlon=ROI['W'], llcrnrlat=ROI['S'], urcrnrlon=ROI['E'], urcrnrlat=ROI['N'], \
+#             lat_0 = 0, lon_0 = 0, projection='cyl',resolution='c')
+# bm.drawcoastlines(color='gray',linewidth=1)
+# plt.scatter(temp.lon_g, temp.lat_g, c = temp['AOD550(MODIS)'], cmap = cmap1, s = 2, vmax = 1)
+# plt.colorbar()
 
-fig = plt.figure(figsize = (8, 4))
-bm = Basemap(llcrnrlon=ROI['W'], llcrnrlat=ROI['S'], urcrnrlon=ROI['E'], urcrnrlat=ROI['N'], \
-            lat_0 = 0, lon_0 = 0, projection='cyl',resolution='c')
-bm.drawcoastlines(color='gray',linewidth=1)
-plt.scatter(temp.lon_g, temp.lat_g, c = temp.SSA_pred, cmap = 'cubehelix', s = 2, vmin = 0.7)
-plt.colorbar()
+# fig = plt.figure(figsize = (8, 4))
+# bm = Basemap(llcrnrlon=ROI['W'], llcrnrlat=ROI['S'], urcrnrlon=ROI['E'], urcrnrlat=ROI['N'], \
+#             lat_0 = 0, lon_0 = 0, projection='cyl',resolution='c')
+# bm.drawcoastlines(color='gray',linewidth=1)
+# plt.scatter(temp.lon_g, temp.lat_g, c = temp.SSA_pred, cmap = 'cubehelix', s = 2, vmin = 0.7)
+# plt.colorbar()
 
-fig = plt.figure(figsize = (8, 4))
-bm = Basemap(llcrnrlon=ROI['W'], llcrnrlat=ROI['S'], urcrnrlon=ROI['E'], urcrnrlat=ROI['N'], \
-            lat_0 = 0, lon_0 = 0, projection='cyl',resolution='c')
-bm.drawcoastlines(color='gray',linewidth=1)
-plt.scatter(temp.lon_g, temp.lat_g, c = temp.SSA500, cmap = 'cubehelix', s = 2, vmin = 0.7)
-plt.colorbar()
+# fig = plt.figure(figsize = (8, 4))
+# bm = Basemap(llcrnrlon=ROI['W'], llcrnrlat=ROI['S'], urcrnrlon=ROI['E'], urcrnrlat=ROI['N'], \
+#             lat_0 = 0, lon_0 = 0, projection='cyl',resolution='c')
+# bm.drawcoastlines(color='gray',linewidth=1)
+# plt.scatter(temp.lon_g, temp.lat_g, c = temp.SSA500, cmap = 'cubehelix', s = 2, vmin = 0.7)
+# plt.colorbar()
 #%%
 ROI = {'S': -75, 'N': 75, 'W': -180, 'E': 180}
 dates = pd.date_range('2006-01-01', '2019-12-31')
@@ -222,28 +225,28 @@ for yy in years:
         except:
             print('No prediction for %4i-%02i' % (yy, mm))
 
-#%%
+
 dataMonth = dataMonth[(dataMonth['Y_pred'] > 0) & (dataMonth['Y_pred'] < dataMonth['AOD550(MODIS)'])]
 dataMonth['YYMM'] = pd.to_datetime(dataMonth.timeStamp * 1e9).dt.to_period('M')
 dataMonth['season'] = (dataMonth.YYMM.dt.month % 12 + 3) // 3
 
-#%%
-mask = (dataMonth['AOD550(MODIS)'] >= 0.1) & (dataMonth.AI388 >= -10) & (dataMonth.landoceanMask <= 1)
+# #%%
+# mask = (dataMonth['AOD550(MODIS)'] >= 0.1) & (dataMonth.AI388 >= -10) & (dataMonth.landoceanMask <= 1)
 
-temp = dataMonth[mask].groupby(['lat_g', 'lon_g']).mean()
-plt.figure()
-plt.scatter(temp.lon, temp.lat, c =  temp.SSA_pred, s = 4, vmin = 0.8, vmax = 1)
-plt.colorbar()
+# temp = dataMonth[mask].groupby(['lat_g', 'lon_g']).mean()
+# plt.figure()
+# plt.scatter(temp.lon, temp.lat, c =  temp.SSA_pred, s = 4, vmin = 0.8, vmax = 1)
+# plt.colorbar()
 
-plt.figure()
-plt.scatter(temp.lon, temp.lat, c =  temp.AI388, s = 4, vmax = 2)
-plt.colorbar()
+# plt.figure()
+# plt.scatter(temp.lon, temp.lat, c =  temp.AI388, s = 4, vmax = 2)
+# plt.colorbar()
 
-plt.figure()
-plt.scatter(temp.lon, temp.lat, c =  temp.Y_pred, s = 4, vmax = 5e-2)
-plt.colorbar()
+# plt.figure()
+# plt.scatter(temp.lon, temp.lat, c =  temp.Y_pred, s = 4, vmax = 5e-2)
+# plt.colorbar()
 
-#%%
+
 dataMonth.loc[dataMonth['AOD550(MODIS)'] < dataMonth['Y_pred'], 'SSA_pred'] = np.nan
 dataMonth.loc[dataMonth['AOD550(MODIS)'] < 0.1, 'SSA_pred'] = np.nan
 dataMonth.loc[dataMonth['AOD550(MODIS)'] < 0.1, 'Y_pred'] = np.nan
@@ -319,94 +322,94 @@ for lo in ['land', 'ocean']:
     cax = fig.add_axes([0.355, 0.1, 0.275, 0.02])
     plt.colorbar(cb, cax, orientation = 'horizontal', label = 'AAOD', extend = 'both')
     plt.savefig(figdir + 'Climatology_AAOD_%s.png' % (lo), dpi = 300, transparent = True)  
-#%%
-cmap = matplotlib.cm.cubehelix_r
-cmap2 = shiftedColorMap(cmap, start=0, midpoint = 0.75, stop=1, name='shifted')
+# #%%
+# cmap = matplotlib.cm.cubehelix_r
+# cmap2 = shiftedColorMap(cmap, start=0, midpoint = 0.75, stop=1, name='shifted')
 
-for lo in ['land', 'ocean']:
-    c = 0
-    fig = plt.figure(figsize = (8, 6.5))
-    for isea in range(1, 5):
-        if lo == 'land': 
-            temp = dataSeason[(dataSeason.season == isea) & \
-                              (dataSeason['AOD550(MODIS)'] > 0.1) & \
-                              (dataSeason['landoceanMask'] > 0.1)] 
-        if lo == 'ocean': 
-            temp = dataSeason[(dataSeason.season == isea) & \
-                              (dataSeason['AOD550(MODIS)'] > 0.1) & \
-                              (dataSeason['landoceanMask'] < 0.1)]          
-        lat = temp['lat_g']
-        lon = temp['lon_g']
+# for lo in ['land', 'ocean']:
+#     c = 0
+#     fig = plt.figure(figsize = (8, 6.5))
+#     for isea in range(1, 5):
+#         if lo == 'land': 
+#             temp = dataSeason[(dataSeason.season == isea) & \
+#                               (dataSeason['AOD550(MODIS)'] > 0.1) & \
+#                               (dataSeason['landoceanMask'] > 0.1)] 
+#         if lo == 'ocean': 
+#             temp = dataSeason[(dataSeason.season == isea) & \
+#                               (dataSeason['AOD550(MODIS)'] > 0.1) & \
+#                               (dataSeason['landoceanMask'] < 0.1)]          
+#         lat = temp['lat_g']
+#         lon = temp['lon_g']
         
-        for i, ipara in enumerate(['AOD550(MODIS)', 'AOD550', 'AOD']):
-            # plt.subplot(4, 3, c + 1)
-            ax = fig.add_axes([0.03 + i * 0.325, 0.77 - (isea - 1) * 0.2, 0.275, 0.17])
-            X = temp[ipara] 
-            bm = Basemap(llcrnrlon=ROI['W'], llcrnrlat=ROI['S'], urcrnrlon=ROI['E'], urcrnrlat=ROI['N'], \
-                        lat_0 = 0, lon_0 = 0, projection='cyl',resolution='c')
-            bm.drawcoastlines(color='gray',linewidth=1)
-            bm.drawparallels(np.arange(-45, 46, 45), labels=[False,True,False,False], linewidth = 0, fontsize = 8)
-            bm.drawmeridians(np.arange(-90, 91, 90), labels=[False,False,False,True], linewidth = 0, fontsize = 8)
-            XX, YY = np.meshgrid(np.arange(-180, 181, 10), np.arange(-90, 91, 10))
-            plt.scatter(XX, YY, c = 'lightgray', s = 100)
-            cb = plt.scatter(lon, lat, c = X, cmap = cmap2, norm=matplotlib.colors.LogNorm(),
-                        s = 4, vmin = 1e-1, vmax = 1, )
+#         for i, ipara in enumerate(['AOD550(MODIS)', 'AOD550', 'AOD']):
+#             # plt.subplot(4, 3, c + 1)
+#             ax = fig.add_axes([0.03 + i * 0.325, 0.77 - (isea - 1) * 0.2, 0.275, 0.17])
+#             X = temp[ipara] 
+#             bm = Basemap(llcrnrlon=ROI['W'], llcrnrlat=ROI['S'], urcrnrlon=ROI['E'], urcrnrlat=ROI['N'], \
+#                         lat_0 = 0, lon_0 = 0, projection='cyl',resolution='c')
+#             bm.drawcoastlines(color='gray',linewidth=1)
+#             bm.drawparallels(np.arange(-45, 46, 45), labels=[False,True,False,False], linewidth = 0, fontsize = 8)
+#             bm.drawmeridians(np.arange(-90, 91, 90), labels=[False,False,False,True], linewidth = 0, fontsize = 8)
+#             XX, YY = np.meshgrid(np.arange(-180, 181, 10), np.arange(-90, 91, 10))
+#             plt.scatter(XX, YY, c = 'lightgray', s = 100)
+#             cb = plt.scatter(lon, lat, c = X, cmap = cmap2, norm=matplotlib.colors.LogNorm(),
+#                         s = 4, vmin = 1e-1, vmax = 1, )
             
-            if i == 0: 
-                plt.ylabel('%s' % (seasons[isea-1]), rotation = 90)
-            if isea == 1:
-                plt.title(labels[i])
-            plt.text(140, -80, '(%s)' % plotidx[c])
-            c +=1
+#             if i == 0: 
+#                 plt.ylabel('%s' % (seasons[isea-1]), rotation = 90)
+#             if isea == 1:
+#                 plt.title(labels[i])
+#             plt.text(140, -80, '(%s)' % plotidx[c])
+#             c +=1
     
-    cax = fig.add_axes([0.355, 0.1, 0.275, 0.02])
-    plt.colorbar(cb, cax, orientation = 'horizontal', label = 'AOD', extend = 'both')
-    plt.savefig(figdir + 'Climatology_AOD_%s.png' % (lo), dpi = 300, transparent = True)
+#     cax = fig.add_axes([0.355, 0.1, 0.275, 0.02])
+#     plt.colorbar(cb, cax, orientation = 'horizontal', label = 'AOD', extend = 'both')
+#     plt.savefig(figdir + 'Climatology_AOD_%s.png' % (lo), dpi = 300, transparent = True)
 
-#%%
-cmap = matplotlib.cm.cubehelix_r
-cmap2 = shiftedColorMap(cmap, start=0, midpoint = 0.75, stop=1, name='shifted')
+# #%%
+# cmap = matplotlib.cm.cubehelix_r
+# cmap2 = shiftedColorMap(cmap, start=0, midpoint = 0.75, stop=1, name='shifted')
 
-for lo in ['land', 'ocean']:
-    c = 0
-    fig = plt.figure(figsize = (8, 6.5))
-    for isea in range(1, 5):
-        if lo == 'land': 
-            temp = dataSeason[(dataSeason.season == isea) & \
-                              (dataSeason['AOD550(MODIS)'] > 0.1) & \
-                              (dataSeason['landoceanMask'] > 0.1)] 
-        if lo == 'ocean': 
-            temp = dataSeason[(dataSeason.season == isea) & \
-                              (dataSeason['AOD550(MODIS)'] > 0.1) & \
-                              (dataSeason['landoceanMask'] < 0.1)]          
-        lat = temp['lat_g']
-        lon = temp['lon_g']
+# for lo in ['land', 'ocean']:
+#     c = 0
+#     fig = plt.figure(figsize = (8, 6.5))
+#     for isea in range(1, 5):
+#         if lo == 'land': 
+#             temp = dataSeason[(dataSeason.season == isea) & \
+#                               (dataSeason['AOD550(MODIS)'] > 0.1) & \
+#                               (dataSeason['landoceanMask'] > 0.1)] 
+#         if lo == 'ocean': 
+#             temp = dataSeason[(dataSeason.season == isea) & \
+#                               (dataSeason['AOD550(MODIS)'] > 0.1) & \
+#                               (dataSeason['landoceanMask'] < 0.1)]          
+#         lat = temp['lat_g']
+#         lon = temp['lon_g']
         
-        for i, ipara in enumerate(['ALH', 'Haer_t1', 'Haer_63']):
-            # plt.subplot(4, 3, c + 1)
-            ax = fig.add_axes([0.03 + i * 0.325, 0.77 - (isea - 1) * 0.2, 0.275, 0.17])
-            X = temp[ipara] 
-            bm = Basemap(llcrnrlon=ROI['W'], llcrnrlat=ROI['S'], urcrnrlon=ROI['E'], urcrnrlat=ROI['N'], \
-                        lat_0 = 0, lon_0 = 0, projection='cyl',resolution='c')
-            bm.drawcoastlines(color='gray',linewidth=1)
-            bm.drawparallels(np.arange(-45, 46, 45), labels=[False,True,False,False], linewidth = 0, fontsize = 8)
-            bm.drawmeridians(np.arange(-90, 91, 90), labels=[False,False,False,True], linewidth = 0, fontsize = 8)
-            XX, YY = np.meshgrid(np.arange(-180, 181, 10), np.arange(-90, 91, 10))
-            plt.scatter(XX, YY, c = 'lightgray', s = 100)
-            cb = plt.scatter(lon, lat, c = X, cmap = cmap2, norm=matplotlib.colors.LogNorm(),
-                        s = 4, vmin = 1, vmax = 10, )
+#         for i, ipara in enumerate(['ALH', 'Haer_t1', 'Haer_63']):
+#             # plt.subplot(4, 3, c + 1)
+#             ax = fig.add_axes([0.03 + i * 0.325, 0.77 - (isea - 1) * 0.2, 0.275, 0.17])
+#             X = temp[ipara] 
+#             bm = Basemap(llcrnrlon=ROI['W'], llcrnrlat=ROI['S'], urcrnrlon=ROI['E'], urcrnrlat=ROI['N'], \
+#                         lat_0 = 0, lon_0 = 0, projection='cyl',resolution='c')
+#             bm.drawcoastlines(color='gray',linewidth=1)
+#             bm.drawparallels(np.arange(-45, 46, 45), labels=[False,True,False,False], linewidth = 0, fontsize = 8)
+#             bm.drawmeridians(np.arange(-90, 91, 90), labels=[False,False,False,True], linewidth = 0, fontsize = 8)
+#             XX, YY = np.meshgrid(np.arange(-180, 181, 10), np.arange(-90, 91, 10))
+#             plt.scatter(XX, YY, c = 'lightgray', s = 100)
+#             cb = plt.scatter(lon, lat, c = X, cmap = cmap2, norm=matplotlib.colors.LogNorm(),
+#                         s = 4, vmin = 1, vmax = 10, )
             
-            if i == 0: 
-                plt.ylabel('%s' % (seasons[isea-1]), rotation = 90)
-            if isea == 1:
-                plt.title(labels[i])
-            plt.text(140, -80, '(%s)' % plotidx[c])
-            c +=1
+#             if i == 0: 
+#                 plt.ylabel('%s' % (seasons[isea-1]), rotation = 90)
+#             if isea == 1:
+#                 plt.title(labels[i])
+#             plt.text(140, -80, '(%s)' % plotidx[c])
+#             c +=1
     
-    cax = fig.add_axes([0.355, 0.1, 0.275, 0.02])
-    plt.colorbar(cb, cax, orientation = 'horizontal', label = 'AOD', extend = 'both')
-    plt.savefig(figdir + 'Climatology_ALH_%s.png' % (lo), dpi = 300, transparent = True)
-#%%
+#     cax = fig.add_axes([0.355, 0.1, 0.275, 0.02])
+#     plt.colorbar(cb, cax, orientation = 'horizontal', label = 'AOD', extend = 'both')
+#     plt.savefig(figdir + 'Climatology_ALH_%s.png' % (lo), dpi = 300, transparent = True)
+
 cmap = matplotlib.cm.cubehelix
 cmap2 = shiftedColorMap(cmap, start=0, midpoint = 0.25, stop=1, name='shifted')
     
@@ -531,7 +534,7 @@ ROIs = {
         'C Africa': {'E': 10, 'W': -15, 'N': 15, 'S': 5},
         'S Africa': {'E': 37.5, 'W': 12.5, 'N': 0, 'S': -35},
         'Arabia': {'E': 60, 'W': 35, 'N': 35, 'S': 10},
-        'N Africa': {'E': 30, 'W': -15, 'N': 35, 'S': 15},
+        'N Africa': {'E': 30, 'W': -15, 'N': 35, 'S': 15}, 
         # 'Australia': {'E': 150, 'W': 115, 'N': -15, 'S': -37.5},
         # 'W America': {'E': -75, 'W': -125, 'N': 60, 'S': 30},
         # 'N Atlantic': {'E': -17.5, 'W': -45, 'N': 35, 'S': 5},
@@ -729,20 +732,29 @@ for isea in range(1, 5):
 #%%
 import string
 plotidx = string.ascii_lowercase
-features = [['AI388', 'AOD550(MODIS)', 'Haer_t1',\
-            'vza', 'raa', 'sza', 'As', 'Ps',\
-            'lat', 'lon', 'doy'],
+features = [
+            # ['AI388', 'AOD550(MODIS)', 'Haer_t1',\
+            # 'vza', 'raa', 'sza', 'As', 'Ps',\
+            # 'lat', 'sin_lon', 'sin_doy'],
             
             ['AI388', 'AOD550(MODIS)', 'Haer_t1',\
-            'vza', 'raa', 'sza', 'As', 'Ps']]
+            'vza', 'raa', 'sza', 'As', 'Ps',\
+            'lat', 'lon', 'doy'],  
+            
+            # ['AI388', 'AOD550(MODIS)', 'Haer_t1',\
+            # 'vza', 'raa', 'sza', 'As', 'Ps']
+                ]
 
-expNames = ["%s_%i-layer_%i-neuron" % ('DNN_AAOD_train_F11', 5, 2**8),
+expNames = [
+            # "%s_%i-layer_%i-neuron" % ('DNN_AAOD_train_ST', 4, 2**6),
+            "%s_%i-layer_%i-neuron" % ('DNN_AAOD_train_F11', 5, 2**8),
             # "%s_%i-layer_%i-neuron" % ('DNN_AAOD_train_F8', 4, 2**7)
             ]
-titles = ['DNN-F11', 'DNN-F8']
+
+titles = ['DNN-ST', 'DNN-F11', 'DNN-F8']
 for i, expName in enumerate(expNames):
     # dataVal = pd.read_pickle(dataOutputDir + '%s_output/%s_output_validation.pickle' % (expName, expName))
-    dataVal = pd.read_pickle(dataOutputDir + 'Validation_all_coincident.pickle')
+    dataVal = pd.read_pickle(dataOutputDir + 'Validation_all_coincident_%s.pickle' % (expName))
     dataVal['AOD500(AERONET)'] = dataVal['Absorption_AOD[500nm]'] / (1 - dataVal['Single_Scattering_Albedo[500nm]'])
     dataVal['AOD550(AERONET)'] = dataVal['Absorption_AOD[550nm]'] / (1 - dataVal['Single_Scattering_Albedo[550nm]'])
     
@@ -1091,47 +1103,47 @@ for i, expName in enumerate(expNames):
     plt.savefig(figdir + 'Validation_screened_SSA.png', dpi = 300, transparent = True)       
 
 
-    paras = {'MODIS': 'AOD550(MODIS)',
-         'OMAERUV': 'AOD500',
-         'MERRA2': 'AOD'}
-    titles = ['DNN-F11', 'OMAERUV', 'MERRA-2']
-    labels = ['pred', 'O', 'M']
-    fig = plt.figure(figsize = (9, 2.75))
-    for i, idata in enumerate(list(paras.keys())):
-        ipara = paras[idata]
+    # paras = {'MODIS': 'AOD550(MODIS)',
+    #      'OMAERUV': 'AOD500',
+    #      'MERRA2': 'AOD'}
+    # titles = ['DNN-F11', 'OMAERUV', 'MERRA-2']
+    # labels = ['pred', 'O', 'M']
+    # fig = plt.figure(figsize = (9, 2.75))
+    # for i, idata in enumerate(list(paras.keys())):
+    #     ipara = paras[idata]
         
-        mask = dataVal['diffAOD_MODIS'] & dataVal['diffAOD_OMAERUV'] &\
-                dataVal['diffSSA_OMAERUV'] & dataVal['diffAOD_MERRA2'] &\
-                (dataVal['AOD550(AERONET)'] >= 0.1) 
-        X1, X2 = dataVal['AOD550(AERONET)'][mask], dataVal[ipara][mask]
-        if idata == 'OMAERUV':
-            X1 = dataVal['AOD550(AERONET)'][mask]
+    #     mask = dataVal['diffAOD_MODIS'] & dataVal['diffAOD_OMAERUV'] &\
+    #             dataVal['diffSSA_OMAERUV'] & dataVal['diffAOD_MERRA2'] &\
+    #             (dataVal['AOD550(AERONET)'] >= 0.1) 
+    #     X1, X2 = dataVal['AOD550(AERONET)'][mask], dataVal[ipara][mask]
+    #     if idata == 'OMAERUV':
+    #         X1 = dataVal['AOD550(AERONET)'][mask]
         
-        slope, intercept, r_value, p_value, std_err = stats.linregress(X1, X2)
-        perc = (abs(X1 - X2) <= 3e-2).sum() / len(X1) * 1e2
-        ax = fig.add_axes([0.05 + i * 0.3, 0.15, 0.22, 0.7])
-        plt.hist2d(X1, X2, bins = 50,
-                   cmap = cmap1, norm = matplotlib.colors.LogNorm(), vmin = 1, vmax = 1e2)
-        plt.plot(np.arange(0, 10), np.arange(0, 10) * slope + intercept, 'k-', linewidth = 1)
-        plt.plot([0, 10], [0, 10], ':', color = 'gray', linewidth = 1)
-        plt.plot([0, 5], [0, 10], '--', color = 'gray', linewidth = 1)
-        plt.plot([0, 10], [0, 5], '--', color = 'gray', linewidth = 1)
-        plt.xlim(0, 2)
-        plt.ylim(0, 2)
-        plt.text(0.1, 0.825, r'  k: %1.2f  b: %1.2f''\n''  $R^2$: %1.2f''\n''  RMSE: %1.2e''\n''  MAE: %1.2e''\n''  P($\pm$0.03): %02i%%''\n''  # num: %i' \
-                 % (slope, intercept, np.corrcoef(X1, X2)[0, 1], 
-                    RMSE(X1, X2), 
-                    MAE(X1, X2), perc, len(X1)))
-        plt.text(1.75, 0.15, '(%s)'.rjust(0) % plotidx[i])
-        plt.ylabel(r'AOD$^{%s}$' % (labels[i]))
-        plt.xlabel(r'AOD$^{A}$')
-        plt.title(titles[i])
-        ax.xaxis.get_major_formatter().set_powerlimits((0,1))
-        ax.yaxis.get_major_formatter().set_powerlimits((0,1))
-    cax =  fig.add_axes([0.915, 0.15, 0.02, 0.7])
-    cb = plt.colorbar(cax = cax, fraction=0.1, pad=0.05, shrink = 0.9, aspect = 10, \
-                  label = '# num', extend = 'both', )
-    plt.savefig(figdir + 'Validation_screened_AOD.png', dpi = 300, transparent = True)             
+    #     slope, intercept, r_value, p_value, std_err = stats.linregress(X1, X2)
+    #     perc = (abs(X1 - X2) <= 3e-2).sum() / len(X1) * 1e2
+    #     ax = fig.add_axes([0.05 + i * 0.3, 0.15, 0.22, 0.7])
+    #     plt.hist2d(X1, X2, bins = 50,
+    #                cmap = cmap1, norm = matplotlib.colors.LogNorm(), vmin = 1, vmax = 1e2)
+    #     plt.plot(np.arange(0, 10), np.arange(0, 10) * slope + intercept, 'k-', linewidth = 1)
+    #     plt.plot([0, 10], [0, 10], ':', color = 'gray', linewidth = 1)
+    #     plt.plot([0, 5], [0, 10], '--', color = 'gray', linewidth = 1)
+    #     plt.plot([0, 10], [0, 5], '--', color = 'gray', linewidth = 1)
+    #     plt.xlim(0, 2)
+    #     plt.ylim(0, 2)
+    #     plt.text(0.1, 0.825, r'  k: %1.2f  b: %1.2f''\n''  $R^2$: %1.2f''\n''  RMSE: %1.2e''\n''  MAE: %1.2e''\n''  P($\pm$0.03): %02i%%''\n''  # num: %i' \
+    #              % (slope, intercept, np.corrcoef(X1, X2)[0, 1], 
+    #                 RMSE(X1, X2), 
+    #                 MAE(X1, X2), perc, len(X1)))
+    #     plt.text(1.75, 0.15, '(%s)'.rjust(0) % plotidx[i])
+    #     plt.ylabel(r'AOD$^{%s}$' % (labels[i]))
+    #     plt.xlabel(r'AOD$^{A}$')
+    #     plt.title(titles[i])
+    #     ax.xaxis.get_major_formatter().set_powerlimits((0,1))
+    #     ax.yaxis.get_major_formatter().set_powerlimits((0,1))
+    # cax =  fig.add_axes([0.915, 0.15, 0.02, 0.7])
+    # cb = plt.colorbar(cax = cax, fraction=0.1, pad=0.05, shrink = 0.9, aspect = 10, \
+    #               label = '# num', extend = 'both', )
+    # plt.savefig(figdir + 'Validation_screened_AOD.png', dpi = 300, transparent = True)             
         
           #%%  
     #  global map AAOD
