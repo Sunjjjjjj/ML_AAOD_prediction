@@ -142,6 +142,14 @@ class dataTrain():
 # =============================================================================
         temp['doy'] = temp['dateTimeLocal'].dt.dayofyear + (temp['dateTimeLocal'].dt.hour + temp['dateTimeLocal'].dt.minute / 60 + temp['dateTimeLocal'].dt.second / 3600) / 24
         temp['distance'] = geoDistance(temp['Latitude(Degrees)'], temp['Longitude(Degrees)'], temp['lat'], temp['lon'])
+        # temp['sin_lon'] = np.sin(np.deg2rad(temp['lon']))
+        # temp['sin_doy'] = np.sin(2 * np.pi * temp['doy'] / 365)
+        temp['sin_lat'] = np.sin(np.deg2rad(temp['lat']))
+        temp['cos_lat'] = np.cos(np.deg2rad(temp['lat']))
+        temp['sin_lon'] = np.sin(np.deg2rad(temp['lon']))
+        temp['cos_lon'] = np.cos(np.deg2rad(temp['lon']))
+        temp['sin_doy'] = np.sin(2 * np.pi * temp['doy'] / 365)
+        temp['cos_doy'] = np.cos(2 * np.pi * temp['doy'] / 365)
 
         # MERRA-2 SSA
         temp['SSA'] = 1 - temp['AAOD'] / temp['AOD']

@@ -31,8 +31,11 @@ from keras import regularizers
 from supportFunctions import *
 from trainingData import *
 
+
+
 # initinalization
 plt.close('all')
+matplotlib.rc('font', family='DejaVu Sans')
 #dataOutputDir = '/nobackup/users/sunj/'
 #dataInputDir = '/nobackup_1/users/sunj/'
 #figdir = '/usr/people/sunj/Dropbox/Paper_Figure/ML_AAOD/'
@@ -42,7 +45,7 @@ dataOutputDir = '/Users/kanonyui/PhD_program/Data/'
 dataInputDir = '/Users/kanonyui/PhD_program/Data/'
 figdir = '/Users/kanonyui/Dropbox/Paper_Figure/ML_AAOD/'
 
-expName = 'DNN_AAOD_ST'
+expName = 'DNN_AAOD_train_ST3'
 try:
     os.mkdir(dataOutputDir + "%s_output/" % expName)
 except:
@@ -72,7 +75,7 @@ plt.close('all')
 # loading training data
 features = ['AI388', 'AOD550(MODIS)', 'Haer_t1',\
             'vza', 'raa', 'sza', 'As', 'Ps',\
-              'lat',  'sin_lon', 'sin_doy']
+              'sin_lat', 'cos_lat', 'sin_lon', 'cos_lon', 'sin_doy', 'cos_doy']
 data = dataTrain(features)
 
 num_features = data.X_train.shape[1]
@@ -121,7 +124,7 @@ alpha = [1e-10]
 # experiment information
 for ilayer in hidden_layers:
     for ineuron in layer_size:
-        expName = "%s_%i-layer_%i-neuron" % ('DNN_AAOD_train_ST', ilayer, ineuron)
+        expName = "%s_%i-layer_%i-neuron" % (expName, ilayer, ineuron)
         train_log_path = scriptDir + "train_log/%s_train_log" % (expName)
         try:
             shutil.rmtree(train_log_path)

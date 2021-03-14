@@ -33,6 +33,7 @@ from trainingData import *
 
 # initinalization
 plt.close('all')
+matplotlib.rc('font', family='DejaVu Sans')
 
 scriptDir = '/usr/people/sunj/Documents/pyvenv/Projects/ML_UVAI/'
 dataOutputDir = '/nobackup/users/sunj/'
@@ -44,7 +45,7 @@ dataOutputDir = '/Users/kanonyui/PhD_program/Data/'
 dataInputDir = '/Users/kanonyui/PhD_program/Data/'
 figdir = '/Users/kanonyui/Dropbox/Paper_Figure/ML_AAOD/'
 
-expName = "%s_%i-layer_%i-neuron" % ('DNN_AAOD_train_ST', 4, 2**6)
+expName = "%s_%i-layer_%i-neuron" % ('DNN_AAOD_train_ST3', 5, 2**6)
 try:
     os.mkdir(dataOutputDir + "%s_output/" % expName)
 except:
@@ -75,7 +76,7 @@ plt.close('all')
 # loading training data
 features = ['AI388', 'AOD550(MODIS)', 'Haer_t1',\
             'vza', 'raa', 'sza', 'As', 'Ps',\
-              'lat',  'sin_lon', 'sin_doy']
+              'sin_lat', 'cos_lat', 'sin_lon', 'cos_lon', 'sin_doy', 'cos_doy']
 data = dataTrain(features)
 num_features = data.X_train.shape[1]
 model = tf.keras.models.load_model(scriptDir + "best_model/best_model_%s" % (expName))
@@ -199,7 +200,7 @@ caseROI = {
             }
 
 caseDate = {
-            '1': pd.date_range('2019-12-31', '2019-12-31'),
+            '1': pd.date_range('2019-01-01', '2019-12-31'),
             }    
  
 parameters = ['Haer_e', 'Haer_a', 'Haer_63', 'Haer_p', 'Haer_t1', 'AOD']
@@ -218,8 +219,12 @@ for icase in caseROI.keys():
             dataTest['doy'] = dataTest['dateTime'].dt.dayofyear + (dataTest['dateTime'].dt.hour + dataTest['dateTime'].dt.minute / 60 + dataTest['dateTime'].dt.second / 3600) / 24
             # dataTest['sin_lon'] = np.sin(np.deg2rad(dataTest['lon']))
             # dataTest['sin_doy'] = np.sin(2 * np.pi * dataTest['doy'] / 365)
+            dataTest['sin_lat'] = np.sin(np.deg2rad(dataTest['lat']))
+            dataTest['cos_lat'] = np.cos(np.deg2rad(dataTest['lat']))
             dataTest['sin_lon'] = np.sin(np.deg2rad(dataTest['lon']))
+            dataTest['cos_lon'] = np.cos(np.deg2rad(dataTest['lon']))
             dataTest['sin_doy'] = np.sin(2 * np.pi * dataTest['doy'] / 365)
+            dataTest['cos_doy'] = np.cos(2 * np.pi * dataTest['doy'] / 365)
 # =============================================================================
 # prediction
 # =============================================================================
