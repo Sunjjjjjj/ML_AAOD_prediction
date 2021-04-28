@@ -198,7 +198,9 @@ class dataTrain():
         temp['diffAOD'] = np.nan
         land = temp['landoceanMask'] >= 0.5
         temp.loc[temp['landoceanMask'] >= 0.5, 'diffAOD'] = np.abs(temp['AOD550(AERONET)'][land] - temp['AOD550(MODIS)'][land]) <= (0.05 + 0.15 * temp['AOD550(AERONET)'][land])
-        temp.loc[temp['landoceanMask'] < 0.5, 'diffAOD'] = np.abs(temp['AOD550(AERONET)'][~land] - temp['AOD550(MODIS)'][~land]) <= (0.03 + 0.05 * temp['AOD550(AERONET)'][~land])
+        # temp.loc[temp['landoceanMask'] < 0.5, 'diffAOD'] = np.abs(temp['AOD550(AERONET)'][~land] - temp['AOD550(MODIS)'][~land]) <= (0.03 + 0.05 * temp['AOD550(AERONET)'][~land])
+        temp.loc[temp['landoceanMask'] < 0.5, 'diffAOD'] = ((temp['AOD550(MODIS)'][~land] - temp['AOD550(AERONET)'][~land]) <= (0.04 + 0.1 * temp['AOD550(AERONET)'][~land])) & ((temp['AOD550(MODIS)'][~land] - temp['AOD550(AERONET)'][~land]) >= -(0.02 + 0.1 * temp['AOD550(AERONET)'][~land]))
+        
         
         temp = temp[(temp['AOD550(MODIS)'] >= 0.0)]
         
