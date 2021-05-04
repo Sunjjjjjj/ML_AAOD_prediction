@@ -69,13 +69,12 @@ plotidx = string.ascii_lowercase
 # training process
 # =============================================================================
 # loading training data
-features = [['AI388', 'AOD550(MODIS)', 'Haer_t1',\
+features = [['residue', 'AOD550(MODIS)', 'Haer_t1',\
             'vza', 'raa', 'sza', 'As', 'Ps',\
-              'lat', 'lon', 'doy'],
-            
-            ['residue', 'AOD550(MODIS)', 'Haer_t1',\
+              'lat', 'lon', 'doy'], 
+            ['AI388', 'AOD550(MODIS)', 'Haer_t1',\
             'vza', 'raa', 'sza', 'As', 'Ps',\
-              'lat', 'lon', 'doy']]
+             ]]
 
 #%%
 cmap = matplotlib.cm.twilight_shifted_r
@@ -84,9 +83,10 @@ cmap = matplotlib.cm.cubehelix_r
 cmap2 = shiftedColorMap(cmap, start=0, midpoint = 0.5, stop=1, name='shifted')
 
 
-expNames = ["%s_%i-layer_%i-neuron" % ('DNN_AAOD_train_F11', 5, 2**8), \
-            "%s_%i-layer_%i-neuron" % ('DNN_AAOD_train_residue', 3, 2**6)]
-titles = ['(a) DNN-F11', '(b) DNN-residue'] 
+expNames = ["%s_%i-layer_%i-neuron" % ('DNN_AAOD_train_residue', 3, 2**6),\
+            "%s_%i-layer_%i-neuron" % ('DNN_AAOD_train_residue_F8', 2, 2**7)]
+            
+titles = ['(a) DNN-F11', '(b) DNN-F8'] 
 fig = plt.figure(figsize = (6.5, 2.5))
 
 for i, expName in enumerate(expNames):
@@ -112,8 +112,8 @@ for i, expName in enumerate(expNames):
     plt.ylim(0, 0.2)
     plt.xticks(np.arange(0, 0.21, 0.05))
     plt.yticks(np.arange(0, 0.21, 0.05))
-    ax.xaxis.get_major_formatter().set_powerlimits((0,1))
-    ax.yaxis.get_major_formatter().set_powerlimits((0,1))
+    # ax.xaxis.get_major_formatter().set_powerlimits((0,1))
+    # ax.yaxis.get_major_formatter().set_powerlimits((0,1))
     plt.plot(np.arange(0, 10), np.arange(0, 10) * slope + intercept, 'k-', linewidth = 1)
     plt.plot([0, 1], [0, 1], '--', color = 'gray', linewidth = 1)
     plt.plot([0, 0.5], [0, 1], '--', color = 'gray', linewidth = 1)
@@ -260,50 +260,50 @@ for i, expName in enumerate(expNames):
 #%% 
 # histogram of input features
 
-# labels = [r'UVAI$_{388}$', r'AOD$_{550}^{M}$', r'H$_{aer}^{t}$', \
-#           'VZA', 'RAA', 'SZA', \
-#           r'a$_s$', r'P$_s$', \
-#           'Lat', 'Lon', 'DOY']
-# fig = plt.figure(figsize = (12, 6))
-# for i, ipara in enumerate(features):
-#     ax = fig.add_axes([0.05 + (i % 4) * 0.24 , 0.7 - (i // 4) * 0.3, 0.2, 0.2])
-#     n, _, _ = plt.hist(data.data[ipara], bins = 25, color = 'gray', alpha=0.7, rwidth=0.7, cumulative = False)
+labels = [r'UVAI$_{388}$', r'AOD$_{550}^{M}$', r'H$_{aer}^{t}$', \
+          'VZA', 'RAA', 'SZA', \
+          r'a$_s$', r'P$_s$', \
+          'Lat', 'Lon', 'DOY']
+fig = plt.figure(figsize = (12, 6))
+for i, ipara in enumerate(features[0]):
+    ax = fig.add_axes([0.05 + (i % 4) * 0.24 , 0.7 - (i // 4) * 0.3, 0.2, 0.2])
+    n, _, _ = plt.hist(data.data[ipara], bins = 25, color = 'gray', alpha=0.7, rwidth=0.7, cumulative = False)
     
-#     if ipara in ['AI388', 'AOD550(MODIS)', 'Haer_t1', 'raa', 'As']: 
-#         x = data.data[ipara].max() * 0.5
-#     else:
-#         x = data.data[ipara].min() + 0.1 * abs(data.data[ipara].min())
-#     y = n.max() * 0.45
-#     plt.text(x, y, 'mean: %1.2f''\n''Std.: %1.2f''\n''max: %1.2f''\n''min: %1.2f' \
-#               %(data.data[ipara].mean(), data.data[ipara].std(), data.data[ipara].max(), data.data[ipara].min()
-#                 ))
-#     ax.yaxis.get_major_formatter().set_powerlimits((0,1))
-#     plt.xlabel('(%s) %s' % (plotidx[i], labels[i]))
-# plt.savefig(figdir + 'Histogram_features.png', dpi = 300, transparent = True)
+    if ipara in ['AI388', 'AOD550(MODIS)', 'Haer_t1', 'raa', 'As']: 
+        x = data.data[ipara].max() * 0.5
+    else:
+        x = data.data[ipara].min() + 0.1 * abs(data.data[ipara].min())
+    y = n.max() * 0.45
+    plt.text(x, y, 'mean: %1.2f''\n''Std.: %1.2f''\n''max: %1.2f''\n''min: %1.2f' \
+              %(data.data[ipara].mean(), data.data[ipara].std(), data.data[ipara].max(), data.data[ipara].min()
+                ))
+    ax.yaxis.get_major_formatter().set_powerlimits((0,1))
+    plt.xlabel('(%s) %s' % (plotidx[i], labels[i]))
+plt.savefig(figdir + 'Histogram_features.png', dpi = 300, transparent = True)
 
 # global distribution of training data
 
-# cmap = matplotlib.cm.twilight_shifted_r
-# cmap1 = shiftedColorMap(cmap, start=0.5, midpoint=0.8, stop=1, name='shifted')
+cmap = matplotlib.cm.twilight_shifted_r
+cmap1 = shiftedColorMap(cmap, start=0.5, midpoint=0.8, stop=1, name='shifted')
 
-# fig = plt.figure(figsize = (8, 4))
-# ax = fig.add_axes([0.1, 0.1, 0.7, 0.7])
-# temp = data.data.groupby(['Longitude(Degrees)', 'Latitude(Degrees)']).count()
-# temp.reset_index(inplace = True)
-# bm = Basemap(llcrnrlon=ROI['W'], llcrnrlat=ROI['S'], urcrnrlon=ROI['E'], urcrnrlat=ROI['N'], \
-#             lat_0 = 0, lon_0 = 0, projection='cyl',resolution='c')
-# bm.drawcoastlines(color='gray',linewidth=1)
-# plt.scatter(temp['Longitude(Degrees)'],  temp['Latitude(Degrees)'], c = temp.lat_g,
-#             s = 50, vmin = 5e0, vmax = 5e2, edgecolor = 'k', cmap = cmap1,
-#             alpha = 0.5, zorder = 10, norm=matplotlib.colors.LogNorm())
-# plt.title('Global distribution of training data')
-# bm.drawparallels(np.arange(-90, 91, 45), labels=[True,False,False,False], linewidth = 0)
-# bm.drawmeridians(np.arange(-180, 181, 60), labels=[False,False,False,True], linewidth = 0)
-# cax = fig.add_axes([0.825, 0.1, 0.025, 0.7])
-# cb = plt.colorbar(cax = cax, fraction=0.1, pad=0.05, shrink = 0.9, aspect = 10, \
-#                   label = '# num', extend = 'both', ticks = [5, 10, 50, 100, 500])
-# cb.ax.set_yticklabels([5, 10, 50, 100, 500]) 
-# plt.savefig(figdir + 'Global_distribution_training_data.png', dpi = 300, transparent = True)
+fig = plt.figure(figsize = (8, 4))
+ax = fig.add_axes([0.1, 0.1, 0.7, 0.7])
+temp = data.data.groupby(['Longitude(Degrees)', 'Latitude(Degrees)']).count()
+temp.reset_index(inplace = True)
+bm = Basemap(llcrnrlon=ROI['W'], llcrnrlat=ROI['S'], urcrnrlon=ROI['E'], urcrnrlat=ROI['N'], \
+            lat_0 = 0, lon_0 = 0, projection='cyl',resolution='c')
+bm.drawcoastlines(color='gray',linewidth=1)
+plt.scatter(temp['Longitude(Degrees)'],  temp['Latitude(Degrees)'], c = temp.lat_g,
+            s = 50, vmin = 5e0, vmax = 5e2, edgecolor = 'k', cmap = cmap1,
+            alpha = 0.5, zorder = 10, norm=matplotlib.colors.LogNorm())
+plt.title('Global distribution of training data')
+bm.drawparallels(np.arange(-90, 91, 45), labels=[True,False,False,False], linewidth = 0)
+bm.drawmeridians(np.arange(-180, 181, 60), labels=[False,False,False,True], linewidth = 0)
+cax = fig.add_axes([0.825, 0.1, 0.025, 0.7])
+cb = plt.colorbar(cax = cax, fraction=0.1, pad=0.05, shrink = 0.9, aspect = 10, \
+                  label = '# num', extend = 'both', ticks = [5, 10, 50, 100, 500])
+cb.ax.set_yticklabels([5, 10, 50, 100, 500]) 
+plt.savefig(figdir + 'Global_distribution_training_data.png', dpi = 300, transparent = True)
 
     
 

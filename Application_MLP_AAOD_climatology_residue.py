@@ -206,7 +206,7 @@ plt.close('all')
 # plt.colorbar()
 #%%
 ROI = {'S': -75, 'N': 75, 'W': -180, 'E': 180}
-dates = pd.date_range('2019-01-01', '2019-12-31')
+dates = pd.date_range('2006-01-01', '2019-12-31')
 seasons = (dates.month % 12 + 3) // 3
 
 years = np.arange(2006, 2020)
@@ -255,8 +255,8 @@ dataMonth.loc[dataMonth['AOD550'] < 0.1, 'AAOD550'] = np.nan
 dataMonth.loc[dataMonth['AOD550'] < 0.1, 'SSA550'] = np.nan
 dataMonth.loc[dataMonth['AOD'] < 0.1, 'AAOD'] = np.nan
 dataMonth.loc[dataMonth['AOD'] < 0.1, 'SSA'] = np.nan
-# dataMonth.loc[dataMonth['AI388std'] > 0.1, 'SSA_pred'] = np.nan
-# dataMonth.loc[dataMonth['AI388std'] > 0.1, 'Y_pred'] = np.nan
+dataMonth.loc[dataMonth['residuestd'] > 0.5, 'SSA_pred'] = np.nan
+dataMonth.loc[dataMonth['residuestd'] > 0.5, 'Y_pred'] = np.nan
 # dataMonth.loc[dataMonth['AI388'] < 0, 'SSA_pred'] = np.nan
 
 dataSeason = dataMonth.groupby(['lat_g', 'lon_g', 'season']).mean()
@@ -279,7 +279,7 @@ cmap2 = shiftedColorMap(cmap, start=0, midpoint = 0.5, stop=1, name='shifted')
 # ROI
 ROI = {'S': -90, 'N': 90, 'W': -180, 'E': 180}
 seasons = ['DJF', 'MAM', 'JJA', 'SON']
-labels = ['DNN-ST', 'OMAERUV', 'MERRA-2']
+labels = ['DNN-F11', 'OMAERUV', 'MERRA-2']
 
 for lo in ['land', 'ocean']:
     c = 0
@@ -288,12 +288,12 @@ for lo in ['land', 'ocean']:
         if lo == 'land': 
             temp = dataSeason[(dataSeason.season == isea) & \
                               (dataSeason['AOD550(MODIS)'] > 0.1) & \
-                              (dataSeason['AI388'] > -1) & \
+                              (dataSeason['residue'] > -1) & \
                               (dataSeason['landoceanMask'] > 0.1)] 
         if lo == 'ocean': 
             temp = dataSeason[(dataSeason.season == isea) & \
                               (dataSeason['AOD550(MODIS)'] > 0.1) & \
-                               (dataSeason['AI388'] > -1) & \
+                               (dataSeason['residue'] > -1) & \
                               (dataSeason['landoceanMask'] < 0.1)]         
         lat = temp['lat_g']
         lon = temp['lon_g']
@@ -599,7 +599,7 @@ for j, iROI in enumerate(ROIs.keys()):
         
     if j > 0:
         j -= 1
-        ax = fig.add_axes([0.1 + (j) % 2 * 0.45, 0.65 - (j ) // 2 * 0.2 , 0.375, 0.1])
+        ax = fig.add_axes([0.1 + (j) % 2 * 0.45, 0.65 - (j ) // 2 * 0.2 , 0.37, 0.1])
         j += 1
         
     X1.plot(label = 'DNN-F11', marker = '', linewidth = 2, color = 'k')
@@ -607,7 +607,7 @@ for j, iROI in enumerate(ROIs.keys()):
     X3.plot(label = 'MERRA-2', marker = '.', linewidth = 1, color = colors[2], markerfacecolor = 'none')
     plt.title('(%s) %s (R$^2_{O}$=%1.2f  R$^2_{M}$=%1.2f)' 
               % (plotidx[j], iROI, X1.corr(X2), X1.corr(X3)), fontsize = 10)
-    ax.yaxis.get_major_formatter().set_powerlimits((0,1))
+    # ax.yaxis.get_major_formatter().set_powerlimits((0,1))
     plt.ylabel('AAOD')
     plt.xticks(fontsize = 8)
     plt.yticks(fontsize = 8)
@@ -645,7 +645,7 @@ for j, iROI in enumerate(ROIs.keys()):
         
     if j > 0:
         j -= 1
-        ax = fig.add_axes([0.1 + (j) % 2 * 0.45, 0.65 - (j ) // 2 * 0.2 , 0.375, 0.1])
+        ax = fig.add_axes([0.1 + (j) % 2 * 0.45, 0.65 - (j ) // 2 * 0.2 , 0.37, 0.1])
         j += 1
         
     X1.plot(label = 'DNN-F11', marker = '', linewidth = 2, color = 'k')
@@ -655,7 +655,7 @@ for j, iROI in enumerate(ROIs.keys()):
     print(X4.corr(X1), X4.corr(X2), X4.corr(X3))
     plt.title('(%s) %s (R$^2_{O}$=%1.2f  R$^2_{M}$=%1.2f)' 
               % (plotidx[j], iROI, X1.corr(X2), X1.corr(X3)), fontsize = 10)
-    ax.yaxis.get_major_formatter().set_powerlimits((0,1))
+    # ax.yaxis.get_major_formatter().set_powerlimits((0,1))
     plt.ylabel('SSA')
     plt.xticks(fontsize = 8)
     plt.yticks(fontsize = 8)
@@ -692,7 +692,7 @@ for j, iROI in enumerate(ROIs.keys()):
         
     if j > 0:
         j -= 1
-        ax = fig.add_axes([0.1 + (j) % 2 * 0.45, 0.65 - (j ) // 2 * 0.2 , 0.375, 0.1])
+        ax = fig.add_axes([0.1 + (j) % 2 * 0.45, 0.65 - (j ) // 2 * 0.2 , 0.37, 0.1])
         j += 1
         
     X1.plot(label = 'DNN-F11', marker = '', linewidth = 2, color = 'k')
@@ -875,10 +875,10 @@ for i, expName in enumerate(expNames):
     fig = plt.figure(figsize = (12, 8))
     for j, ipara in enumerate(features[i] + ['dAOD']):
         x, y = (j) % 4, (j) // 4
-        ax = fig.add_axes([0.05 + 0.225 * x, 0.7 - 0.3 * y, 0.17, 0.225])
+        ax = fig.add_axes([0.075 + 0.225 * x, 0.7 - 0.3 * y, 0.17, 0.225])
         
         if j == 11:
-            X1 = dataVal['AOD550(MODIS)'] - dataVal['AOD550(AERONET)']
+            X1 = (dataVal['AOD550(MODIS)'] - dataVal['AOD550(AERONET)'])
             plt.xlabel(r'AOD$^{M}$ - AOD$^{A}$')
         else:
             X1 = dataVal[ipara]
@@ -887,28 +887,55 @@ for i, expName in enumerate(expNames):
         
         X1, X2 = X1[mask], X2[mask]
         
+        X3 = pd.DataFrame(np.c_[X1, X2], columns = ['X1', 'X2'], index = X1.index)
+        values = np.linspace(X1.min(), X1.max(), 10)
+
+        X3 = X3.sort_values(['X1'])
+        X3.reset_index(inplace = True)
+        X3['group'] = 1 
+        # for k, v in enumerate(values[1:]):
+        #     print(values[k], v)
+        #     X3.loc[(X1 >= values[k]) & (X1 < v), 'group'] = k + 1
+        values = np.arange(0, len(X3) + len(X3) % 20, len(X3) // 20)
+        for k, v in enumerate(values[1:]):
+            X3.iloc[values[k]:v]['group'] = k + 1
+            
+        X3_gm = X3.groupby(['group']).mean()   
+        X3_gs = X3.groupby(['group']).std()   
+        
+        
+        
         slope, intercept, r_value, p_value, std_err = stats.linregress(X1, X2)
         plt.hist2d(X1, X2, cmap = cmap1, bins = 50, norm=matplotlib.colors.LogNorm(), vmin = 10)
-        plt.ylabel(r'AAOD$^{pred}$ - AAOD$^{A}$')
         
-        plt.text(X1.min(), -3.5e-2, r'    k: %1.2f  b: %1.2f''\n''    $R^2$: %1.2f' \
+        plt.errorbar(X3_gm.X1, X3_gm.X2, yerr = X3_gs.X2, label = 'Grouped statistics', alpha = 0.75,\
+                     color = 'r', ecolor = 'r', marker = 'o', elinewidth = 1, mfc = 'None', linewidth = 0)
+        plt.hlines(0, -1e4, 1e4, color = 'k', linestyle = '--', linewidth = 1, alpha = 0.75, zorder = 100)
+        if j == 11:
+            plt.legend(loc = 2)
+        if j % 4 == 0:
+            plt.ylabel(r'AAOD$^{pred}$ - AAOD$^{A}$')
+        
+        plt.text(X1.min(), -1.5e-2, r'    k: %1.2f  b: %1.2f''\n''    $R^2$: %1.2f' \
                   % (slope, intercept, X1.corr(X2)))
-        plt.text(X1.min(), -3.5e-2, '(%s)'.rjust(45)  % plotidx[j])
+        plt.text(X1.min(), -1.5e-2, '(%s)'.rjust(45)  % plotidx[j])
         ax.xaxis.get_major_formatter().set_powerlimits((0,1))
-        ax.yaxis.get_major_formatter().set_powerlimits((0,1))
+        # ax.yaxis.get_major_formatter().set_powerlimits((0,1))
+        plt.ylim(-0.02, 0.02)
+        
         
     cax =  fig.add_axes([0.925, 0.1, 0.015, 0.225])
     cb = plt.colorbar(cax = cax, fraction=0.1, pad=0.05, shrink = 0.9, aspect = 10, \
-                  label = '# num', extend = 'both', )
+                  label = '# num', extend = 'both')
     plt.savefig(figdir + 'dAAOD_against_features_%s.png' % (titles[i]), dpi = 300, transparent = True)        
-
+#%%
 
     # SSA difference against features   
  
     fig = plt.figure(figsize = (12, 8))
     for j, ipara in enumerate(features[i] + ['dAOD']):
         x, y = (j) % 4, (j) // 4
-        ax = fig.add_axes([0.05 + 0.225 * x, 0.7 - 0.3 * y, 0.17, 0.225])
+        ax = fig.add_axes([0.075 + 0.225 * x, 0.7 - 0.3 * y, 0.17, 0.225])
         
         if j == 11:
             X1 = (dataVal['AOD550(MODIS)'] - dataVal['AOD550(AERONET)'])
@@ -920,23 +947,47 @@ for i, expName in enumerate(expNames):
         X2 = dataVal['SSA_pred'] - dataVal['Single_Scattering_Albedo[550nm]']
 
         X1, X2 = X1[mask], X2[mask]
+
+        X3 = pd.DataFrame(np.c_[X1, X2], columns = ['X1', 'X2'], index = X1.index)
+        values = np.linspace(X1.min(), X1.max(), 10)
+        X3 = X3.sort_values(['X1'])
+        X3.reset_index(inplace = True)
+        X3['group'] = 1 
+        # for k, v in enumerate(values[1:]):
+        #     print(values[k], v)
+        #     X3.loc[(X1 >= values[k]) & (X1 < v), 'group'] = k + 1
+        values = np.arange(0, len(X3) + len(X3) % 20, len(X3) // 20)
+        for k, v in enumerate(values[1:]):
+            X3.iloc[values[k]:v]['group'] = k + 1
+            
+        X3_gm = X3.groupby(['group']).mean()   
+        X3_gs = X3.groupby(['group']).std()   
         
         slope, intercept, r_value, p_value, std_err = stats.linregress(X1, X2)
         plt.hist2d(X1, X2, cmap = cmap1, bins = 50, norm=matplotlib.colors.LogNorm(), vmin = 10)
-        plt.ylabel(r'SSA$^{pred}$ - SSA$^{A}$')
+        # plt.ylabel(r'SSA$^{pred}$ - SSA$^{A}$')
+        plt.errorbar(X3_gm.X1, X3_gm.X2, yerr = X3_gs.X2, label = 'Grouped statistics', alpha = 0.75, \
+                     color = 'r', ecolor = 'r', marker = 'o', elinewidth = 1, mfc = 'None', linewidth = 0)
+        plt.hlines(0, -1e4, 1e4, color = 'k', linestyle = '--', linewidth = 1, alpha = 0.75, zorder = 100)
 
-        plt.text(X1.min(), -9e-1, r'    k: %1.2f  b: %1.2f''\n''    $R^2$: %1.2f' \
+        if j == 11:
+            plt.legend(loc = 8)
+        if j % 4 == 0:
+            plt.ylabel(r'SSA$^{pred}$ - SSA$^{A}$')
+
+        plt.text(X1.min(), 1.5e-1, r'    k: %1.2f  b: %1.2f''\n''    $R^2$: %1.2f' \
                   % (slope, intercept, X1.corr(X2)))
-        plt.text(X1.min(), -9e-1, '(%s)'.rjust(45)  % plotidx[j])
+        plt.text(X1.min(), 1.5e-1, '(%s)'.rjust(45)  % plotidx[j])
 
         ax.xaxis.get_major_formatter().set_powerlimits((0,1))
-        ax.yaxis.get_major_formatter().set_powerlimits((0,1))
+        # ax.yaxis.get_major_formatter().set_powerlimits((0,1)
+        plt.ylim(-0.3, 0.3)
             
     cax =  fig.add_axes([0.925, 0.1, 0.015, 0.225])
     cb = plt.colorbar(cax = cax, fraction=0.1, pad=0.05, shrink = 0.9, aspect = 10, \
                   label = '# num', extend = 'both', )
     plt.savefig(figdir + 'dSSA_against_features_%s.png' % (titles[i]), dpi = 300, transparent = True)        
-
+      
 
 #%%
     # validate SSA
@@ -1020,7 +1071,7 @@ for i, expName in enumerate(expNames):
          'OMAERUV': 'AAOD500',
          'MERRA2': 'AAOD'}
     
-    titles = ['DNN-F13', 'OMAERUV', 'MERRA-2']
+    titles = ['DNN-F11', 'OMAERUV', 'MERRA-2']
     labels = ['pred', 'O', 'M']
     fig = plt.figure(figsize = (9, 2.75))
     for i, idata in enumerate(list(paras.keys())):
@@ -1055,8 +1106,8 @@ for i, expName in enumerate(expNames):
         plt.ylabel(r'AAOD$^{%s}$' % (labels[i]))
         plt.xlabel(r'AAOD$^{A}$')
         plt.title(titles[i])
-        ax.xaxis.get_major_formatter().set_powerlimits((0,1))
-        ax.yaxis.get_major_formatter().set_powerlimits((0,1))
+        # ax.xaxis.get_major_formatter().set_powerlimits((0,1))
+        # ax.yaxis.get_major_formatter().set_powerlimits((0,1))
     cax =  fig.add_axes([0.915, 0.15, 0.02, 0.7])
     cb = plt.colorbar(cax = cax, fraction=0.1, pad=0.05, shrink = 0.9, aspect = 10, \
                   label = '# num', extend = 'both', )
@@ -1645,8 +1696,8 @@ for k, itype in enumerate(['Smoke', 'Dust', 'Mixed', 'Other']):
     ymax = np.ceil(max(X1.max(), X2.max()) * 10) / 10
     plt.xlim([0, ymax])
     plt.ylim([0, ymax])
-    ax.xaxis.get_major_formatter().set_powerlimits((0,1))
-    ax.yaxis.get_major_formatter().set_powerlimits((0,1))
+    # ax.xaxis.get_major_formatter().set_powerlimits((0,1))
+    # ax.yaxis.get_major_formatter().set_powerlimits((0,1))
     plt.xticks(np.linspace(0, ymax, 3))
     plt.yticks(np.linspace(0, ymax, 3))
     
@@ -1655,7 +1706,7 @@ for k, itype in enumerate(['Smoke', 'Dust', 'Mixed', 'Other']):
 
     stats_type = stats_type.append(temp)
 plt.legend()    
-plt.savefig(figdir + 'Type_vld.png', dpi = 300, transparent = True)  
+plt.savefig(figdir + 'Type_vld_residue.png', dpi = 300, transparent = True)  
 
 
 
