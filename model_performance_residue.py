@@ -269,7 +269,7 @@ for i, ipara in enumerate(features[0]):
     ax = fig.add_axes([0.05 + (i % 4) * 0.24 , 0.7 - (i // 4) * 0.3, 0.2, 0.2])
     n, _, _ = plt.hist(data.data[ipara], bins = 25, color = 'gray', alpha=0.7, rwidth=0.7, cumulative = False)
     
-    if ipara in ['AI388', 'AOD550(MODIS)', 'Haer_t1', 'raa', 'As']: 
+    if ipara in ['residue', 'AOD550(MODIS)', 'Haer_t1', 'raa', 'As']: 
         x = data.data[ipara].max() * 0.5
     else:
         x = data.data[ipara].min() + 0.1 * abs(data.data[ipara].min())
@@ -294,7 +294,7 @@ bm = Basemap(llcrnrlon=ROI['W'], llcrnrlat=ROI['S'], urcrnrlon=ROI['E'], urcrnrl
             lat_0 = 0, lon_0 = 0, projection='cyl',resolution='c')
 bm.drawcoastlines(color='gray',linewidth=1)
 plt.scatter(temp['Longitude(Degrees)'],  temp['Latitude(Degrees)'], c = temp.lat_g,
-            s = 50, vmin = 5e0, vmax = 5e2, edgecolor = 'k', cmap = cmap1,
+            s = 50, vmin = 5e0, vmax = 5e2, edgecolor = 'k', cmap = 'rainbow',
             alpha = 0.5, zorder = 10, norm=matplotlib.colors.LogNorm())
 plt.title('Global distribution of training data')
 bm.drawparallels(np.arange(-90, 91, 45), labels=[True,False,False,False], linewidth = 0)
